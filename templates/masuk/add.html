@@ -1,0 +1,424 @@
+{% extends 'layout.html' %}
+{% block title %} TAMBAH BARANG MASUK {% endblock %}
+{% load widget_tweaks %}
+{% load static %}
+{% block content %}
+    <script xmlns="http://www.w3.org/1999/html">
+    function disable(){
+        $(".tanggal").attr("disabled","disabled")
+        $(".nota").attr("disabled","disabled")
+        $(".suplier").attr("disabled","disabled")
+        $(".sales").attr("disabled","disabled")
+        $(".pembayaran").attr("disabled","disabled")
+        $(".tempo").attr("disabled","disabled")
+        $(".keterangan").attr("disabled","disabled")
+        $(".simpan").attr("disabled","disabled")
+        $(".tambahbarang").attr("disabled","disabled")
+        $(".tambahbiaya").attr("disabled","disabled")
+
+
+    }
+
+    function enable(){
+        $(".tanggal").focus()
+        $(".tanggal").removeAttr("disabled")
+        $(".nota").removeAttr("disabled")
+        $(".suplier").removeAttr("disabled")
+        $(".sales").removeAttr("disabled")
+        $(".pembayaran").removeAttr("disabled")
+        $(".tempo").removeAttr("disabled")
+        $(".keterangan").removeAttr("disabled")
+        $(".simpan").removeAttr("disabled")
+        $(".tanggal").val("")
+        $(".nota").val("")
+        $(".sales").val("")
+        $(".tempo").val("")
+        $(".keterangan").val("")
+        $(".detailBarang tbody").html("")
+        $(".tableBiaya tbody").html("")
+        $(".masukId").val("")
+    }
+
+    function removeBarang(id){
+       var masukId=$(".masukId").val();
+       $.ajax({
+           url:"/bmasuk/delete/"+id,
+           success:function(data){
+               $(".detailBarang  tbody").html("")
+               getBarang(masukId)
+           }
+       });
+
+    }
+    function removeBiaya(id){
+        var masukId=$(".masukId").val();
+          $.ajax({
+           url:"/biaya/delete/"+id,
+           success:function(data){
+
+               $(".tableBiaya  tbody").html("")
+               getBiaya(masukId)
+           }
+       });
+    }
+    function getBiaya(id){
+         $.getJSON("http://localhost:8000/biaya/getBiaya/"+id+"?format=json", function(data) {
+                 var total=0;
+                 for (i in data) {
+                     var item = data[i];
+                     $('.tableBiaya').append('<tr><td>' + item.namaBiaya + '</td><td>' +item.jumlahBiaya+ '<a href="#" title="remove" class="btn btn-danger pull-right btn-flat btn-sm" onclick="removeBiaya(' + item.id + ')"><i class="fa fa-remove" aria-hidden="true"></i></a></td></tr>');
+                     total += parseFloat(item.jumlahBiaya);
+                                 }
+
+         });
+
+    }
+    function getBarang(id){
+            $.getJSON("http://localhost:8000/bmasuk/getBarang/"+id+"?format=json", function(data) {
+                                   for (i in data) {
+                                       var total=0;
+                                       var item = data[i];
+                                       var subtotal=item.jumlah*item.harga;
+                                      $('.detailBarang').append('<tr><td>'+item.barang.kodeBarang+'</td><td>'+item.barang.namaBarang+'</td><td>'+item.satuan.namaSatuan+'</td><td>'+item.jumlah+'</td><td>'+item.harga+'</td><td>'+subtotal+'<a href="#" title="remove" class="btn btn-danger pull-right btn-flat btn-sm" onclick="removeBarang('+item.id+')"><i class="fa fa-remove" aria-hidden="true"></i></a></td></tr>');
+                                      total+=item.jumlah*item.harga;
+                                   }
+                       });
+    }
+    $(document).ready(function () {
+         disable()
+         $(".harga").number(true);
+         $(".jumlah").number(true)
+        var id=$(".masukId").val();
+        $.getJSON("http://localhost:8000/bmasuk/getBarang/"+id+"?format=json", function(data) {
+                                   for (i in data) {
+                                       var total=0;
+                                       var item = data[i];
+                                       var subtotal=item.jumlah*item.harga;
+                                      $('.detailBarang').append('<tr><td>'+item.barang.kodeBarang+'</td><td>'+item.barang.namaBarang+'</td><td>'+item.satuan.namaSatuan+'</td><td>'+item.jumlah+'</td><td>'+item.harga+'</td><td>'+subtotal+'<a href="#" title="remove" class="btn btn-danger pull-right btn-flat btn-sm" onclick="removeBarang('+item.id+')"><i class="fa fa-remove" aria-hidden="true"></i></a></td></tr>');
+                                      total+=item.jumlah*item.harga;
+                                   }
+                       });
+        $.getJSON("http://localhost:8000/biaya/getBiaya/"+id+"?format=json", function(data) {
+                 var total=0;
+                 for (i in data) {
+                     var item = data[i];
+                     $('.tableBiaya').append('<tr><td>' + item.namaBiaya + '</td><td>' +item.jumlahBiaya+ '<a href="#" title="remove" class="btn btn-danger pull-right btn-flat btn-sm" onclick="removeBiaya(' + item.id + ')"><i class="fa fa-remove" aria-hidden="true"></i></a></td></tr>');
+                     total += parseFloat(item.jumlahBiaya);
+                                 }
+
+         });
+       $('.tanggal').datepicker({
+
+
+          format: 'yyyy-mm-dd'
+             });
+           $(".suplier").select2();
+           $(".pembayaran").select2();
+           $(".barang").select2();
+           $(".satuan").select2();
+           var form=$(".form");
+           var formBiaya=$(".formBiaya");
+           var formBarang=$(".formBarang");
+           form.submit(function (e) {
+                $.ajax({
+                    url:form.attr("action"),
+                    data:form.serialize(),
+                    type:form.attr("method"),
+                    success:function (data) {
+                     $(".masukId").val(data)
+                        $.ambiance({message: "Data saved",
+                            title: "Success !!",
+                            type: "success"});
+                        $(".simpan").attr("disabled","disabled")
+                        $(".tambahbarang").removeAttr("disabled","disabled")
+                        $(".tambahbiaya").removeAttr("disabled","disabled")
+
+                    }
+                });
+               e.preventDefault();
+           });
+           formBiaya.submit(function (e) {
+               var masukId=$(".masukId").val();
+               $.ajax({
+                   url:formBiaya.attr("action"),
+                   data:formBiaya.serialize(),
+                   type:formBiaya.attr("method"),
+                   success:function(data){
+                       $(".tableBiaya  tbody").html("");
+                       getBiaya(masukId);
+               }
+               });
+
+               e.preventDefault();
+           })
+           formBarang.submit(function (e) {
+               var masukId=$(".masukId").val();
+               $.ajax({
+                   url:formBarang.attr("action"),
+                   data:formBarang.serialize(),
+                   type:formBarang.attr("method"),
+                   success:function(data){
+                          $(".detailBarang  tbody").html("")
+                          getBarang(masukId)
+
+
+
+
+
+                   }
+               });
+               e.preventDefault();
+           })
+        })
+    </script>
+
+<section class="content-header">
+      <h1>
+      &nbsp;
+      </h1>
+      <ol class="breadcrumb">
+        <li><a href="#"><i class="fa fa-plus-circle"></i> Tambah Barang Masuk</a></li>
+        <li><a href="http://192.168.10.250:82/admin/bodys">Barang Masuk</a></li>
+        <li class="active">Data Barang Masuk</li>
+      </ol>
+</section>
+    <section class="content">
+      <div class="row">
+        <!-- left column -->
+        <div class="col-md-12">
+          <!-- general form elements -->
+          <div class="box box-primary">
+         <div class="box-header with-border">
+              <h3 class="box-title">Master Barang Masuk</h3>
+            </div>
+
+                  <div class="box-body">
+	<form class="form form-horizontal" role="form" action="save" method="post"> {% csrf_token %}
+<input type="hidden" name="posted_by" value="{{user.id}}">
+   <br>
+
+<div class="form-group">
+   <label class="control-label col-sm-1">Tanggal</label>
+   <div class="col-md-3">
+    {{ form.tanggal | add_class:'form-control tanggal' }}
+   </div>
+   <label class="control-label col-sm-1">No Nota</label>
+   <div class="col-md-3">
+       {{ form.nota | add_class:'form-control nota' }}
+   </div>
+   <label class="control-label col-sm-1">Supplier</label>
+    <div class="col-md-3">
+       {{ form.suplier | add_class:'form-control suplier' }}
+   </div>
+</div>
+
+<div class="form-group">
+   <label class="control-label col-sm-1">Sales</label>
+   <div class="col-md-3">
+    {{ form.sales | add_class:'form-control sales' }}
+   </div>
+   <label class="control-label col-sm-1">Pembayaran</label>
+   <div class="col-md-3">
+       {{ form.pembayaran | add_class:'form-control pembayaran' }}
+   </div>
+   <label class="control-label col-sm-1">Tempo</label>
+    <div class="col-md-3">
+       {{ form.jangkaWaktu | add_class:'form-control waktu tempo' }}
+   </div>
+</div>
+
+<div class="form-group">
+   <label class="control-label col-sm-1">Keterangan</label>
+   <div class="col-md-7">
+    {{ form.keterangan | add_class:'form-control keterangan' | attr:"rows:2" }}
+   </div>
+
+
+  <div class="col-md-2 pull-right ">
+      <div class="pull-right"></div>
+    <button class="btn btn-sm btn-primary btn-flat red simpan " type="submit" name="action" id="save">
+   <i class="fa fa-save" aria-hidden="true"></i>&nbsp;SAVE
+        </button>
+                                            <a class="btn btn-sm btn-danger btn-flat " id="new" onclick="enable()">    <!-- <i class="material-icons">mode_edit</i> --><i class="fa fa-plus" aria-hidden="true"></i></a>
+
+  </div>
+    </div>
+</div>
+               </form>
+ <div class="box box-primary" style="min-height: 500px">
+
+           <div class="box-body" >
+           <h2 class="page-header">Detail </h2>
+
+      <div class="row" >
+        <div class="col-md-12">
+          <!-- Custom Tabs -->
+          <div class="nav-tabs-custom">
+            <ul class="nav nav-tabs">
+              <li class="active"><a href="#tab_1" data-toggle="tab">BARANG</a></li>
+              <li><a href="#tab_2" data-toggle="tab">BIAYA</a></li>
+
+
+              <li class="pull-right"><a href="#" class="text-muted"><i class="fa fa-gear"></i></a></li>
+            </ul>
+            <div class="tab-content"  style="min-height: 300px">
+              <div class="tab-pane active" id="tab_1">
+
+
+            <!-- Button trigger modal -->
+
+
+<!-- Modal -->
+<div class="modal fade " id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">FORM BARANG MASUK</h4>
+      </div>
+      <div class="modal-body">
+          <form class="formBarang    form-horizontal" role="form" action="/bmasuk/save" method="post"> {% csrf_token %}
+
+              <input type="hidden" name="posted_by" value="{{user.id}}">
+           <div class="form-group">
+           <label  class="col-sm-3 control-label">Nama Barang</label>
+                    <div class="col-sm-9">
+                   {{ frm.barang | add_class:'barang'|attr:'style:width:100%' }}
+                    </div>
+           </div>
+
+           <div class="form-group">
+           <label  class="col-sm-3 control-label">Satuan</label>
+                    <div class="col-sm-9">
+                   {{ frm.satuan | add_class:'satuan'|attr:'style:width:100%' }}
+                    </div>
+           </div>
+
+           <div class="form-group">
+           <label  class="col-sm-3 control-label">Jumlah</label>
+                    <div class="col-sm-9">
+                   {{ frm.jumlah | add_class:'form-control jumlah'|attr:'style:width:100%' }}
+                    </div>
+           </div>
+
+           <div class="form-group">
+           <label  class="col-sm-3 control-label">Harga</label>
+                    <div class="col-sm-9">
+                   {{ frm.harga | add_class:'form-control harga'|attr:'style:width:100%' }}
+                    </div>
+           </div>
+
+
+      </div>
+      <div class="modal-footer">     <input type="text" name="masuk" class="masukId" readonly style="border: none;background: none;color: white">
+        <button type="button" class="btn btn-default btn-flat" data-dismiss="modal">Close</button>
+          <input type="submit" value="SAVE" class="btn-flat btn btn-primary">
+
+      </div>
+    </form>
+    </div>
+  </div>
+</div>
+<button type="button" class="btn btn-primary btn-sm pull-right btn-flat tambahbarang" data-toggle="modal" data-target="#myModal">
+  <i class="fa fa-plus-circle"></i> &nbsp;Tambah Barang
+</button>
+                  <br>
+                  <br>
+                  <div class="spinner"></div>
+                  <table class="table table-bordered detailBarang">
+                      <thead>
+                      <tr>
+                          <th>Kode Barang</th>
+                          <th>Nama Barang</th>
+                          <th>Satuan</th>
+                          <th>Jumlah</th>
+                          <th>Harga Satuan</th>
+                          <th>Sub Total</th>
+                      </tr>
+                      </thead>
+                  </table>
+<br>
+              </br>
+              </br>
+              </div>
+              <!-- /.tab-pane -->
+              <div class="tab-pane" id="tab_2">
+ <!-- Modal Biaya-->
+<div class="modal fade " id="biaya" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">FORM BIAYA</h4>
+      </div>
+      <div class="modal-body">
+          <form class="formBiaya form-horizontal" role="form" action="/biaya/save" method="post"> {% csrf_token %}
+
+
+           <div class="form-group">
+           <label  class="col-sm-3 control-label">Nama Biaya</label>
+                    <div class="col-sm-9">
+                   {{ fbi.namaBiaya | add_class:'form-control biaya' }}
+                    </div>
+           </div>
+
+           <div class="form-group">
+           <label  class="col-sm-3 control-label">Jumlah Biaya</label>
+                    <div class="col-sm-9">
+                   {{ fbi.jumlahBiaya | add_class:'form-control jumlah' }}
+                    </div>
+           </div>
+
+
+
+      </div>
+      <div class="modal-footer">     <input type="text" name="masuk" class="masukId" readonly style="border: none;background: none;color: white">
+        <button type="button" class="btn btn-default btn-flat" data-dismiss="modal">Close</button>
+          <input type="submit" value="SAVE" class="btn-flat btn btn-primary">
+
+      </div>
+    </form>
+    </div>
+  </div>
+</div>
+                  <button type="button" class="btn btn-primary btn-sm pull-right btn-flat tambahbiaya" data-toggle="modal" data-target="#biaya">
+  <i class="fa fa-plus-circle"></i> &nbsp;Tambah Biaya
+</button>
+                  <br>
+                  <br>
+            <table class="table tableBiaya">
+<tr>
+<thead>
+<th>Nama Biaya</th>
+<th>Jumlah Biaya</th>
+</thead>
+<tbody>
+
+</tbody>
+ </table>
+              </div>
+
+            </div>
+            <!-- /.tab-content -->
+          </div>
+          <!-- nav-tabs-custom -->
+        </div>
+        <!-- /.col -->
+
+
+        <!-- /.col -->
+      </div>
+           </div>
+     </div>
+</div>
+
+
+
+
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+{% endblock content %}

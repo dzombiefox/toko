@@ -1,0 +1,57 @@
+{% extends 'layout.html' %}
+{% block title %} RETUR BARANG MASUK {% endblock %}
+{% load static %}
+{% load templatetags %}
+{% block content %}
+         <section class="content-header">
+    <h1>&nbsp;</h1>
+     <ol class="breadcrumb">
+      <li>Data Kategori</li>
+        <li><a >Kategori</a></li>
+
+       </ol>
+    </section>
+    <section class="content">
+      <div class="row">
+        <div class="col-xs-12">
+                    <!-- /.box -->
+
+          <div class="box">
+
+            <!-- /.box-header -->
+            <div class="box-body">
+{#            <h4>Data Kategori</h4>#}
+{#            <br>#}
+             <table class="table table-bordered table-hover" id="example">
+                 <thead>
+                 <tr>
+                     <th>No</th>
+                     <th>Tanggal</th>
+                     <th>Barang</th>
+                     <th>Keterangan</th>
+
+                 </tr>
+                 </thead>
+                 <tbody>
+                 {% for item in data%}
+                     <tr>
+                         <td style="width: 4%" align="center">{{ forloop.counter }}</td>
+                         <td>{{ item.created_at | date }}</td>
+                         <td>{{ item.bmasuk.barang }}</td>
+                         <td>{{ item.keterangan }}</td>
+
+                    </tr>
+
+                 {% endfor %}
+                 </tbody>
+
+
+             </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+{% endblock content %}

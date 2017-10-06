@@ -1,0 +1,64 @@
+{% extends 'layout.html' %}
+{% block title %} UBAH STOK {% endblock %}
+{% load static %}
+{% load templatetags %}
+{% load humanize %}
+{% block content %}
+
+         <section class="content-header">
+    <h1>&nbsp;</h1>
+     <ol class="breadcrumb">
+        <li>&nbsp;Data Harga</li>
+        <li><a >Harga</a></li>
+      </ol>
+    </section>
+    <section class="content">
+      <div class="row">
+        <div class="col-xs-12">
+                    <!-- /.box -->
+
+          <div class="box">
+
+            <!-- /.box-header -->
+            <div class="box-body">
+{#            <h4>Data Kategori</h4>#}
+{#            <br>#}
+
+             <table class="table table-bordered table-hover" id="example">
+                 <thead>
+                 <tr>
+                     <th>No</th>
+                     <th>Tanggal</th>
+                     <th>Nama Barang</th>
+                     <th>Stok awal</th>
+                     <th>Jumlah Ubah</th>
+                     <th>Diubah Oleh</th>
+                     <th>Keterangan</th>
+                 </tr>
+                 </thead>
+                 <tbody>
+                 {% for item in data %}
+                     <tr>
+
+                         <td>{{ forloop.counter }}</td>
+                         <td>{{ item.created_at | date }}</td>
+                         <td>{{ item.stok.barang}}</td>
+                         <td>{{ item.stokawal }}&nbsp;{{ item.stok.satuan }}</td>
+                         <td>{{ item.jumlah }}&nbsp;{{ item.stok.satuan }}</td>
+                         <td>{{ item.posted_by }}</td>
+                         <td>{{ item.keterangan }}</td>
+                    </tr>
+
+                 {% endfor %}
+                 </tbody>
+
+
+             </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+{% endblock content %}

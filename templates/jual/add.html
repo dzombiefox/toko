@@ -1,0 +1,584 @@
+{% extends 'layout.html' %}
+{% block title %} TAMBAH BARANG JUAL {% endblock %}
+{% load widget_tweaks %}
+{% load static %}
+{% block content %}
+    <script>
+
+    function disable(){
+        $(".barang").attr("disabled","disabled")
+        $(".satuan").attr("disabled","disabled")
+        $(".qty").attr("disabled","disabled")
+        $(".hargalain").attr("disabled","disabled")
+        $(".tambah").attr("disabled","disabled")
+        $(".tanggal").attr("disabled","disabled")
+        $(".pembeli").attr("disabled","disabled")
+        $(".status").attr("disabled","disabled")
+        $(".pembayaran").attr("disabled","disabled")
+        $(".potongan").attr("disabled","disabled")
+        $(".keterangan").attr("disabled","disabled")
+        $(".bayar").attr("disabled","disabled")
+        $(".btnbonus").attr("disabled","disabled")
+        $(".btnupdate").attr("disabled","disabled")
+
+    }
+
+    function getprice(){
+       var barang = $(".barang").val();
+       var satuan = $(".satuan").val();
+       $.ajax({
+           url : "getprice/"+barang+"/"+satuan,
+           success:function(data){
+               $(".hargalain").val(formatNumber(data))
+           }
+       })
+    }
+
+    function enable(){
+        $(".barang").removeAttr("disabled")
+        $(".satuan").removeAttr("disabled")
+        $(".qty").removeAttr("disabled")
+        $(".hargalain").removeAttr("disabled")
+        $(".tambah").removeAttr("disabled")
+        $(".tanggal").removeAttr("disabled")
+        $(".pembeli").removeAttr("disabled")
+        $(".status").removeAttr("disabled")
+        $(".pembayaran").removeAttr("disabled")
+        $(".potongan").removeAttr("disabled")
+        $(".keterangan").removeAttr("disabled")
+        $(".bayar").removeAttr("disabled")
+        $(".btnbonus").removeAttr("disabled")
+        $(".btnupdate").removeAttr("disabled")
+{#        $(".barang").select2("open");#}
+    }
+
+    function cekStatus(val){
+        var pembayaran=$(".pembayaran").val()
+        var value =val.replace(",","")
+        var total=$(".grandtotal").val().replace(",","")
+        if (parseFloat(value) < parseFloat(total) || pembayaran =="1"){
+{#            alert("no time")#}
+        }
+        else{
+            alert("Maaf Seharusnya status Lunas !!")
+            $(".bayar").val(0)
+        }
+    }
+    function grandTotal(val){
+       $(".bayar").val(0)
+       var total=$(".total").val().replace(",","")
+       var value=val.replace(",","")
+
+       var hasil=parseFloat(total)-parseFloat(value)
+       if(hasil <0){
+           alert("Maaf Potongan tidak boleh melebihi total belanja !!")
+           $(".potongan").val(0)
+           $(".grandtotal").val(total)
+       }
+       else{
+           $(".grandtotal").val(hasil)
+       }
+
+    }
+    function kosong(){
+        $(".bayar").val("")
+        $(".qty").val("")
+        $(".tanggal").val("")
+        $(".tableBarang  tbody").html("")
+        $(".pembeli").val("")
+        $(".potongan").val("")
+        $(".keterangan").val("")
+        $(".jualId").val("")
+        $(".qty").focus()
+        $(".grandtotal").val("")
+
+    }
+    function removeBarang(idbarang){
+         var id = $(".jualId").val()
+         $.ajax({
+           url:"/bjual/delete/"+idbarang,
+           success:function(data){
+{#               alert("ok")#}
+{#                 $.ambiance({message: "Item removed",#}
+{#                            title: "Success !!",#}
+{#                            type: "success"});#}
+{#                 alert(id)#}
+                 $(".tableBarang  tbody").html("")
+                 getBarang(id)
+               $(".potongan").val(0)
+           }
+       });
+    }
+    function print(id){
+          var thePopup = window.open( '/jual/print/'+id, "Customer Listing", "scrollbars=1,menubar=0,location=0,height=auto,width=750" );
+             $('#popup-content').clone().appendTo( thePopup.document.body );
+             thePopup.print();
+    }
+{#    function formatNumber(number)#}
+{#        {#}
+{#            number = number.toFixed(2) + '';#}
+{#            x = number.split('.');#}
+{#            x1 = x[0];#}
+{#            x2 = x.length > 1 ? '.' + x[1] : '';#}
+{#            var rgx = /(\d+)(\d{3})/;#}
+{#            while (rgx.test(x1)) {#}
+{#                x1 = x1.replace(rgx, '$1' + ',' + '$2');#}
+{#            }#}
+{#            return x1 + x2;#}
+{#        }#}
+    function getBarang(id){
+        $.getJSON("http://localhost:8000/bjual/getBarangJual/"+id+"?format=json", function(data) {
+            var total=0;
+            for (i in data) {
+                     var item = data[i];
+                     var harga,subtotal;
+                     var pilihan=item.pilihan
+                     if(pilihan==1){
+                      harga="-- bonus -- ";
+                      subtotal="-- bonus --";
+                     }else {
+                      harga = formatNumber(item.hargaJual, 2)
+                      subtotal = formatNumber(parseFloat(item.hargaJual * item.jumlahJual), 0)
+                      total+=parseFloat(item.hargaJual * item.jumlahJual)
+                     }
+                     $('.tableBarang tbody').append('<tr><td>' + item.barang.namaBarang + '</td><td align="center">' +item.satuan.namaSatuan+'</td><td align="center">'+harga+'</td><td align="center">'+item.jumlahJual+'</td><td align="center">'+subtotal+'</td><td align="center"><a href="#" title="remove" class="btn btn-danger remove btn-flat btn-xs" onclick="removeBarang('+item.id+')"><i class="fa fa-remove" aria-hidden="true"></i>&nbsp;Hapus Barang</a></td></tr>');
+
+                 }
+                  $('.tableBarang tbody').append('<tr><td colspan="4"><strong>TOTAL BELANJA</strong></td><td align="center"><strong>Rp.'+formatNumber(total)+'</strong></td><td></td></tr>')
+                     $(".total").val(total)
+                     var potongan=parseFloat($(".potongan").val())
+                     var grandotal=parseFloat(total)-potongan
+{#                     $(".grandtotal").val(grandotal)#}
+                    $(".grandtotal").val(formatNumber(grandotal))
+         });
+
+    }
+        $(document).ready(function () {
+            disable()
+            $(".hargalain").number(true)
+            $(".grandtotal").number(true);
+            $(".potongan").number(true);
+            $(".bayar").number(true);
+            $(".bonus").click(function(){
+            $('#ModalBonus').modal('show');
+            })
+               var id = $(".jualId").val()
+               $.getJSON("http://localhost:8000/bjual/getBarangJual/"+id+"?format=json", function(data) {
+                 var total=0;
+                 for (i in data) {
+                     var item = data[i];
+                     var harga, subtotal;
+                     var pilihan = item.pilihan
+                     if (pilihan == 1) {
+                         harga = "-- bonus --";
+                         subtotal = "-- bonus --";
+                     } else {
+                         harga = formatNumber(item.hargaJual, 2)
+                         subtotal = formatNumber(parseFloat(item.hargaJual * item.jumlahJual), 0)
+                         total += parseFloat(item.hargaJual * item.jumlahJual)
+                     }
+                     $('.tableBarang tbody').append('<tr><td>' + item.barang.namaBarang + '</td><td align="center">' + item.satuan.namaSatuan + '</td><td align="center">' + harga + '</td><td align="center">' + item.jumlahJual + '</td><td align="center">' + subtotal + '</td><td align="center"><a href="#" title="remove" class="btn btn-danger remove btn-flat btn-xs" onclick="removeBarang(' + item.id + ')"><i class="fa fa-remove" aria-hidden="true"></i>&nbsp;Hapus Barang</a></td></tr>');
+                                  }
+                     $('.tableBarang tbody').append('<tr><td colspan="4"><strong>TOTAL BELANJA</strong></td><td align="center"><strong>Rp.'+formatNumber(total)+'</strong></td><td></td></tr>')
+                     $(".total").val(total)
+                     var potongan=parseFloat($(".potongan").val())
+                     var grandotal=parseFloat(total)-potongan
+                     $(".grandtotal").val(grandotal)
+         });
+          $('.tanggal').datepicker({
+
+          format: 'yyyy-mm-dd'
+             });
+          $('#modalstok').on('hidden.bs.modal', function () {
+          $(".modal-body2").html("");
+          $("#modalstok").hide()
+          })
+           $(".barang").select2()
+           $(".satuan").select2()
+           $(".pembayaran").select2()
+           $(".status").select2()
+           $(".jumlah").val("");
+           var form=$(".form");
+           var formBarang=$(".formBarang");
+           var formBonus=$(".formBonus");
+           var formUpdate=$(".formupdate");
+           formBarang.submit(function (e) {
+               var id = $(".jualId").val()
+               $.ajax({
+                   data:formBarang.serialize(),
+                   url:formBarang.attr("action"),
+                   type:formBarang.attr("method"),
+                   success:function(data){
+                       if(data == "0"){
+                           alert("Harga belum ada !!")
+                       }
+                       else if(data == "1" | data =="2" |data =="3") {
+                           var barang =$(".barang").val()
+                           $("#modalstok").modal("show")
+                           var url ="{% url 'modalstok' 123%}"
+                           $("#modalstok").find('.modal-body2').load(url.replace('123',barang));
+{#                           alert("Stok Tidak Adwa")#}
+                       }
+                       else {
+                             $(".tableBarang  tbody").html("")
+                             getBarang(id);
+                             $(".qty").val("")
+                             $(".qty").focus()
+                             $(".hargalain").val(0)
+
+                       }
+{#                       alert(data)#}
+{#                      $(".tableBarang  tbody").html("")#}
+{#                      getBarang(id);#}
+{#                      $(".qty").val("")#}
+{#                      $(".qty").focus()#}
+                   }
+               })
+               e.preventDefault()
+           })
+            formBonus.submit(function (e) {
+               var id = $(".jualId").val()
+               $.ajax({
+                   data:formBonus.serialize(),
+                   url:formBonus.attr("action"),
+                   type:formBonus.attr("method"),
+                   success:function(data){
+                      $(".tableBarang  tbody").html("")
+                      getBarang(id);
+                   }
+               })
+               e.preventDefault()
+           })
+           formUpdate.submit(function (e) {
+{#               alert("ok")#}
+               var bayar = $(".bayar").val()
+               var pembayaran = $(".pembayaran").val()
+               var grandtotal = $(".grandtotal").val()
+{#               alert(grandtotal)#}
+{#               alert(bayar)#}
+               var id = $(".jualId").val()
+               var tanggal=$(".tanggal").val()
+               var pembeli=$(".pembeli").val()
+               var pembayaran=$(".pembayaran").val()
+               if (tanggal==""){
+                   alert("tanggal tidak boleh kosong !!")
+                   $(".tanggal").focus()
+               }
+               else if(pembeli==""){
+                    alert("pembeli tidak boleh kosong !!")
+                    $(".pembeli").focus()
+               }
+               else if(pembayaran == ""){
+                   alert("metode pembayaran belum dipilih")
+                   $(".pembayaran").focus()
+               }
+               else {
+                   if (pembayaran == "1" && (parseFloat(bayar) < parseFloat(grandtotal))) {
+                       alert("Maaf Jika lunas , jumlah bayar tidak boleh lebih kecil dari Grand total !! ")
+                       $(".bayar").focus()
+                   }
+                   else {
+
+                       $.ajax({
+                           url: formUpdate.attr("action"),
+                           data: formUpdate.serialize(),
+                           type: formUpdate.attr("method"),
+                           success: function (data) {
+{#                               $.ambiance({#}
+{#                                   message: "Data saved",#}
+{#                                   title: "Success !!",#}
+{#                                   type: "success"#}
+{#                               });#}
+                               print(id)
+                               $(".baru").removeAttr("disabled")
+                           }
+
+                       })
+                   }
+               }
+               e.preventDefault()
+           })
+           form.submit(function (e) {
+
+                   $.ajax({
+                       url: form.attr("action"),
+                       data: form.serialize(),
+                       type: form.attr("method"),
+                       success: function (data) {
+                           $.ambiance({
+                               message: "Data saved",
+                               title: "Success !!",
+                               type: "success"
+                           });
+                           kosong()
+                           enable()
+                           $(".jualId").val(data)
+                           $(".baru").attr("disabled","disabled")
+
+                       }
+                   });
+
+               e.preventDefault();
+           })
+        })
+    </script>
+
+         <section class="content-header">
+    <h1>&nbsp;</h1>
+     <ol class="breadcrumb">
+        <li> <i class="fa fa-plus-circle"></i> Tambah Jumlah</li>
+        <li><a >Jumlah</a></li>
+        <li class="active"><a href="{% url 'jumlah' %}"><button type="button" class="btn btn-danger btn-xs"><span class="fa fa-floppy-o"></span>&nbsp; Data Jumlah </button></a></li>
+      </ol>
+    </section>
+
+
+
+          <section class="content">
+            <div class="row">
+                  <div class="col-md-12">
+              <!-- general form elements -->
+              <div class="box box-primary">
+                <br>
+<form  role="form" action="/bjual/save" method="post" class="formBarang"> {% csrf_token %}
+                  <input type="hidden" name="jual" class="jualId">
+                  <input type="hidden" name="pilihan" value="0">
+                  <div class='col-sm-5'>
+                     <div class='form-group'>
+                          <label for="user_lastname"><strong>Nama Barang</strong></label>
+                             {{ frm.barang | add_class:'form-control barang' |attr:"onchange:getprice()"}}
+                     </div>
+                  </div>
+                   <div class='col-sm-2'>
+                     <div class='form-group'>
+                          <label for="user_lastname"><strong>Satuan</strong></label>
+                             {{ frm.satuan | add_class:'form-control satuan'  |attr:"onchange:getprice()"}}
+                     </div>
+                  </div>
+                   <div class='col-sm-1'>
+                     <div class='form-group'>
+                          <label for="user_lastname"><strong>Jumlah</strong></label>
+                             {{ frm.jumlahJual | add_class:'form-control qty' }}
+                     </div>
+                  </div>
+    <div class='col-sm-2'>
+                     <div class='form-group'>
+                          <label for="user_lastname"><strong>Harga / Optional</strong></label>
+                             {{ frm.hargalain | add_class:'form-control hargalain' |attr:"placeholder:Harga lain"}}
+                     </div>
+                  </div>
+                   <div class='col-sm-2'>
+                     <div class='form-group'>
+
+                            <label for="user_lastname">&nbsp;</label><br>
+                           {% csrf_token %}
+                           <input type="hidden" name="posted_by" value="{{user.id}}" >
+
+                           <button class="btn-flat btn btn-success tambah"><i class="fa fa-cart-plus" aria-hidden="true"></i></button>
+</form>
+                       <form  style="display: inline;" role="form" action="save" method="post" class="form">
+                            {% csrf_token %}
+                            <input type="hidden" name="posted_by" value="{{user.id}}" >
+                            <button class="btn btn-primary plus btn-flat  baru"><i class="fa fa-plus-circle" aria-hidden="true"></i>&nbspBaru</button>
+                       </form>
+
+                     </div>
+                  </div>
+
+
+                  <br>
+                  <br>
+                         <table class="table table-bordered tableBarang" style="width: 98%" align="center">
+              <thead style="background-color: #00a7d0;color: white">
+                <th>Nama Barang</th>
+                <th>Satuan</th>
+                <th>Harga</th>
+                <th>Jumlah</th>
+                <th>Sub Total</th>
+                <th>#</th>
+              </thead>
+                <tbody>
+
+                </tbody>
+          </table>
+                  <br>
+
+
+            <!-- Modal bonus begin -->
+<div class="modal fade " id="ModalBonus" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">FORM BONUS BARANG</h4>
+
+      </div>
+      <div class="modal-body">
+          <form class="formBonus    form-horizontal" role="form" action="/bjual/save" method="post"> {% csrf_token %}
+              <input type="hidden" name="jual" class="jualId" >
+              <input type="hidden" name="pilihan" value="1">
+              <input type="hidden" name="posted_by" value="{{user.id}}">
+               <input type="hidden" name="hargalain"  value="0"/>
+           <div class="form-group">
+           <label  class="col-sm-3 control-label">Nama Barang</label>
+                    <div class="col-sm-9">
+                   {{ frm.barang | add_class:'barang'|attr:'style:width:100%' }}
+                    </div>
+           </div>
+
+           <div class="form-group">
+           <label  class="col-sm-3 control-label">Satuan</label>
+                    <div class="col-sm-9">
+                   {{ frm.satuan | add_class:'satuan'|attr:'style:width:100%' }}
+                    </div>
+           </div>
+
+           <div class="form-group">
+           <label  class="col-sm-3 control-label">Jumlah</label>
+                    <div class="col-sm-9">
+                   {{ frm.jumlahJual | add_class:'form-control jumlah'|attr:'style:width:100%' }}
+                    </div>
+           </div>
+
+
+
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default btn-flat" data-dismiss="modal">Close</button>
+          <input type="submit" value="SAVE" class="btn-flat btn btn-primary">
+
+      </div>
+    </form>
+    </div>
+  </div>
+</div> <!-- end modal bonus-->
+                   <!-- Modal stok begin -->
+<div class="modal fade " id="modalstok" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-backdrop="static" data-keyboard="false">
+  <div class="modal-dialog" role="document" style="width:1250px;min-height: 400px">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">DATA STOK BARANG</h4>
+      </div>
+      <div class="modal-body2">
+
+
+
+      </div>
+    </div>
+  </div>
+</div> <!-- end modal stok-->
+
+<style>
+    .form2{
+        width: 280px;
+    }
+</style>
+
+	<form class="formupdate form-horizontal" role="form" action="update" method="post"> {% csrf_token %}
+<input type="hidden" name="posted_by" value="{{user.id}}">
+          <input type="hidden" name="jual" class="jualId">
+   <br>
+
+<div class="form-group">
+   <label class="control-label col-sm-1">&nbsp;</label>
+   <div class="col-md-3">
+   &nbsp;
+   </div>
+   <label class="control-label col-sm-1">Tanggal</label>
+   <div class="col-md-3">
+       {{ form.tanggal | add_class:'form-control tanggal form2' }}
+   </div>
+   <label class="control-label col-sm-1">Pembeli</label>
+    <div class="col-md-3">
+       {{ form.namaPembeli | add_class:'form-control pembeli form2' }}
+   </div>
+</div>
+
+<div class="form-group">
+   <label class="control-label col-sm-1">&nbsp;</label>
+   <div class="col-md-3">
+
+   </div>
+   <label class="control-label col-sm-1">Pembayaran</label>
+   <div class="col-md-3">
+       {{ form.pembayaran | add_class:'form-control pembayaran form2' }}
+   </div>
+    <label class="control-label col-sm-1">Potongan</label>
+   <div class="col-md-3">
+       {{ form.potongan | add_class:'form-control potongan form2' | attr:"value:0" | attr:"onkeyup:grandTotal(this.value)" |attr:"autocomplete:false" }}
+   </div>
+
+</div>
+        <div class="form-group">
+   <label class="control-label col-sm-1">&nbsp;</label>
+   <div class="col-md-3">
+    &nbsp;
+   </div>
+    <label class="control-label col-sm-1">Status</label>
+    <div class="col-md-3" >
+       {{ form.statusPembeli | add_class:'form-control status form2' }}
+   </div>
+   <label class="control-label col-sm-1">Grand Total</label>
+    <div class="col-md-3" >
+      <input type="hidden" class="total">
+      <input type="text" readonly class="form-control form2 grandtotal" value="0">
+   </div>
+</div>
+                <div class="form-group">
+   <label class="control-label col-sm-1">&nbsp;</label>
+   <div class="col-md-3">
+    &nbsp;
+   </div>
+   <label class="control-label col-sm-1">Keterangan</label>
+   <div class="col-md-3">
+       {{ form.keterangan | add_class:'form-control keterangan form2'| attr:"rows:2"  }}
+   </div>
+     <label class="control-label col-sm-1">Bayar</label>
+    <div class="col-md-3 " >
+     {{ form.bayar | add_class:'form-control  form2 bayar' | attr:"value:0" | attr:"onkeyup:cekStatus(this.value)"}}
+
+  </div>
+
+</div>
+        <div class="form-group">
+   <label class="control-label col-sm-1">&nbsp;</label>
+   <div class="col-md-6">
+{#    &nbsp;<iframe id="content" src="about:blank" style="width: 100%;height: 300px;border: none"></iframe>#}
+   </div>
+
+    <div class="col-md-3  pull-right" >
+<a  class="btn btn-success btn-sm bonus btn-flat btnbonus">
+                                   <i class="fa fa-cart-plus" aria-hidden="true"></i> &nbsp;Bonus</a>&nbsp;
+                                     <a  >
+    <button class="btn btn-sm btn-primary btn-flat red  btnupdate" type="submit" name="action" id="save">
+   <i class="fa fa-print" aria-hidden="true"></i>&nbsp;SELESAI / PRINT
+        </button>
+
+
+  </div>
+
+</div>
+
+</form>
+
+
+                      <br>
+                        <br>
+                        <br>
+
+
+            </div>
+                  </div>
+            </div>
+
+
+
+
+
+
+</section>
+
+
+{% endblock content %}

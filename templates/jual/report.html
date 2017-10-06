@@ -1,0 +1,212 @@
+{% extends 'layout.html' %}
+{% block title %} JUAL BARANG {% endblock %}
+{% load static %}
+{% load templatetags %}
+{% load humanize %}
+{% block content %}
+
+    <style type="text/css">
+
+.datagrid table {
+    border-collapse: collapse;
+    text-align: left; width: 100%; }
+.datagrid {font: normal 14px/150% Arial, Helvetica, sans-serif;
+          background: #fff; overflow: hidden; -webkit-border-radius: 3px;
+          -moz-border-radius: 3px;
+          border-radius: 3px;}
+.datagrid table td,
+.datagrid table th { padding: 3px 10px; }
+.datagrid table thead th {background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #006699), color-stop(1, #00557F) );
+background:-moz-linear-gradient( center top, #006699 5%, #00557F 100% );
+filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#006699', endColorstr='#00557F');
+background-color:#006699; color:#FFFFFF; font-size: 12px; font-weight: bold; border-left: 1px solid #0070A8;
+}
+.datagrid table thead th:first-child { border: none; }
+.datagrid table tbody td { color: #00557F; border-left: 1px solid #E1EEF4;
+font-size: 11px;font-weight: normal;
+}.datagrid table tbody .alt td { background: #E1EEF4; color: #00557F; }
+.datagrid table tbody td:first-child { border-left: none; }
+.datagrid table tbody tr:last-child td { border-bottom: none; }
+ </style>
+        <style>
+        .glyphicon{
+          color:#333;}
+        body {
+
+            font-family: 'Arial';
+        }
+
+        .fa-btn {
+            margin-right: 6px;
+        }
+    fieldset {
+    padding: 10px 10px 0px 10px;
+    border: 1px solid #dfe5c1;
+    margin: 0px 0px 10px 0px;
+    width: auto;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+}
+
+    </style>
+         <section class="content-header">
+    <h1>&nbsp;</h1>
+     <ol class="breadcrumb">
+        <li><i class="fa fa-floppy-o"></i> &nbsp;Data Penjualan Barang</li>
+        <li><a >Penjualan Barang</a></li>
+        <li class="active"><a href="{% url 'jual' %}"><button type="button" class="btn btn-danger btn-xs"><span class="fa fa-plus-circle"></span> Tambah Barang</button></a></li>
+      </ol>
+    </section>
+    <section class="content">
+      <div class="row">
+        <div class="col-xs-12">
+                    <!-- /.box -->
+
+          <div class="box">
+
+            <!-- /.box-header -->
+            <div class="box-body datagrid">
+{#            <h4>Data Kategori</h4>#}
+{#            <br>#}
+{#            <div class="box box-danger">#}
+{#            <div class="box-header with-border">#}
+{#              <h3 class="box-title">Different Width</h3>#}
+{#            </div>#}
+                <form method="POST" action="report">
+                {% csrf_token %}
+            <div class="box-body ">
+              <div class="row">
+                   <div class="col-xs-5">
+                   </div>
+                <div class="col-xs-3">
+                  <input type="text" class="form-control date" placeholder="tanggal 1" name="date1" required >
+                </div>
+                <div class="col-xs-3">
+                  <input type="text" class="form-control date" placeholder="tanggal 2" name="date2" required >
+                </div>
+                <div class="col-xs-1">
+                  <input type="submit" value="Cari" class="btn btn-primary btn-flat" >
+                </div>
+              </div>
+            </div>
+                </form>
+             <table class="table table-bordered table-hover" >
+                 <thead>
+                 <tr>
+                     <th>No</th>
+                     <th>Tanggal</th>
+{#                     <th>Nama Pembeli</th>#}
+                     <th>Nama Barang</th>
+                     <th>Jumlah Jual</th>
+                     <th>Harga Modal</th>
+                     <th>Harga Jual</th>
+                     <th>Selisih</th>
+                     <th >Total Belanja</th>
+{#                     <th>Potongan</th>#}
+
+
+                 </tr>
+                 </thead>
+                 <tbody>
+
+                 {% for data in jual %}
+                     <tr>
+                         <td>{{ forloop.counter }}</td>
+                         <td>{{ data.tanggal |date:"d-m-Y" }}</td>
+
+                         <td colspan="5"></td>
+                         <td align="right"><strong><font color="red"> Rp. {{ data.id | totalBelanja |intcomma }}</font></strong></td>
+                    </tr>
+                     {% for item in datas %}
+                         {% if item.jual_id == data.id %}
+                          <tr>
+                          <td colspan="2"></td>
+
+                          <td>{{ item.barang }}</td>
+                          <td align="center">{{ item.jumlahJual }} &nbsp;{{ item.satuan }}</td>
+                          {% if item.pilihan == "0" %}
+                          <td align="center">{{ item.hargaModal | intcomma }}</td>
+                          <td align="center">{{ item.hargaJual | intcomma }}</td>
+                          <td align="center">{{ item.selisih | intcomma }}</td>
+                          <td></td>
+                          {% else %}
+                              <td align="center" colspan="3"><strong>Bonus</strong></td>
+                          <td></td>
+                          {% endif %}
+                            </tr>
+                         {% endif %}
+                           {% endfor %}
+                    <tr>
+                    <td colspan="5"></td>
+                     <td colspan="2" align="center"><strong>Margin </strong></td>
+
+                        <td align="right"><strong>Rp. {{ data.id | margin |intcomma }}</strong></td>
+                    </tr>
+                     <tr>
+                    <td colspan="5"></td>
+                     <td colspan="2" align="center"><strong>Potongan Diskon </strong></td>
+                        <td align="right"><strong>Rp. {{ data.potongan | intcomma }}</strong></td>
+                    </tr>
+                     <tr>
+                          <td colspan="5"></td>
+                     <td colspan="2" align="center"><strong>Potongan Bonus</strong></td>
+                        <td align="right"><strong>Rp. {{ data.id |potonganbonus |intcomma }}</strong></td>
+                     </tr>
+                      <td colspan="5"></td>
+                     <td colspan="2" align="center"><strong>Keuntungan</strong></td>
+                        <td align="right"><strong><u>Rp. {{ data.id |totalkeuntungan |intcomma }}</strong></u></td>
+                     </tr>
+
+                     <tr>
+                         <td colspan="5"></td>
+{#                     <td ></td>#}
+{#                     <td ></td>#}
+{#                     <td ></td>#}
+{#                     <td ></td>#}
+                     <td colspan="2" align="center"><strong>Status Pembayaran</strong></td>
+
+                         <td align="right"><strong>{% if data.statusBeli == "0" %}Hutang{% else %}Lunas{% endif %}</strong></td>
+
+                    </tr>
+                    <tr>
+                    <td colspan="8"><hr></td>
+                    </tr>
+                     {% empty %}
+                     <tr>
+                       <td colspan="8">Data Tidak Ditemukan</td>
+                     </tr>
+
+                 {% endfor %}
+
+                 </tbody>
+
+
+             </table>
+                <div class="row">
+                       <div class="col-xs-9">
+                       </div>
+                    <div class="col-xs-3">
+                        <strong><p><u>Omset Penjualan :</u><font color="red"> Rp. {{ date1| omset:date2 |intcomma}}</font></p>
+                            <p><u>Total Keuntungan :</u> <font color="red">Rp. {{ date1| rangekeuntungan:date2 |intcomma}}</font></p>
+                        </strong>
+                    </div>
+
+                </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+{#      </div>#}
+     <script >
+        $(document).ready(function(){
+
+            $(".date").datepicker({
+               format: 'yyyy-mm-dd'
+             });
+        });
+    </script>
+    </section>
+
+
+{% endblock content %}

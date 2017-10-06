@@ -1,0 +1,110 @@
+{% extends 'layout.html' %}
+{% block title %} TAMBAH HARGA {% endblock %}
+{% load widget_tweaks %}
+{% load static %}
+{% block content %}
+    <script>
+    function empty(){
+        $(".hmodal").val("");
+        $(".hjual").val("");
+    }
+        $(document).ready(function () {
+            empty();
+           $(".barang").select2()
+           $(".satuan").select2()
+           var form=$(".form");
+           form.submit(function (e) {
+                 var progress = $(".loading-progress").progressTimer({
+                        timeLimit: 0.5,
+                        onFinish: function () {
+                            $.ambiance({message: "Data saved",
+                            title: "Success !!",
+                            type: "success"});
+                        }
+                                 });
+                $.ajax({
+                    url:form.attr("action"),
+                    data:form.serialize(),
+                    type:form.attr("method"),
+                    success:function (data) {
+
+                            empty();
+                    }
+                }).error(function(){
+                   progress.progressTimer('error', {
+                   errorText:'Error',
+                   onFinish:function(){
+                   alert('There was an error processing your information!');
+            }
+        });
+    }).done(function(){
+        progress.progressTimer('complete');
+    });
+               e.preventDefault();
+           })
+        })
+    </script>
+         <section class="content-header">
+    <h1>&nbsp;</h1>
+     <ol class="breadcrumb">
+        <li> Tambah Harga</li>
+        <li><a >Harga</a></li>
+      </ol>
+    </section>
+
+
+
+      <section class="content">
+      	<form class="form" role="form" action="save" method="post"> {% csrf_token %}
+<input type="hidden" name="posted_by" value="{{user.id}}">
+      <div class="row">
+        <!-- left column -->
+        <div class="col-md-12">
+          <!-- general form elements -->
+          <div class="box box-primary">
+
+ <div class="row">
+        <!-- left column -->
+        <div class="col-md-12">
+<div class="box-body">
+       <label for="first_name">Barang</label>
+           {{ form.barang | add_class:'barang ' | attr:"style:width:100%" }}
+</div>
+<div class="box-body">
+       <label for="first_name">Satuan</label>
+           {{ form.satuan | add_class:'satuan' | attr:"style:width:100%"  }}
+</div>
+
+<div class="box-body">
+       <label for="first_name">Harga Modal</label>
+           {{ form.modal | add_class:'form-control hmodal '}}
+</div>
+<div class="box-body">
+       <label for="first_name">Harga Jual</label>
+           {{ form.jual | add_class:'form-control hjual' }}
+</div>
+ <div class="box-body sukses" >
+                 <div class="loading-progress"></div>
+  </div>
+<div class="box-footer ">
+        <button style="float: right;" class="btn btn-sm btn-primary  btn-flat" type="submit" name="action" id="save"><i class="fa fa-save" aria-hidden="true"></i>&nbsp;&nbsp;SIMPAN HARGA
+
+        </button>
+     <a style="float: right; margin-right: 5px" href="{% url 'harga' %}" class="btn btn-sm btn-warning  btn-flat" type="submit" name="action" id="save"><i class="fa fa-arrow-right" aria-hidden="true"></i>&nbsp;Kembali
+
+     </a>
+</div>
+</div>
+</div>
+
+                    </div>
+                </div>
+            </div>
+        </form>
+   </section>
+
+
+
+
+
+{% endblock content %}

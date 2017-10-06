@@ -1,0 +1,115 @@
+{% load static %}
+{% load staticfiles %}
+{% load humanize %}
+<style>
+@font-face {
+	font-family: 'DOTMATRI';
+    font-size: 2px;
+	src: url({% static "fonts/DOTMATRI.eot" %});
+	src: local('DOTMATRI'), url({% static "/fonts/DOTMATRI.woff" %}) format('woff'), url({% static "fonts/DOTMATRI.ttf" %}) format('truetype');
+}
+/* use this class to attach this font to any element i.e. <p class="fontsforweb_fontid_507">Text with this font applied</p> */
+.fontsforweb_fontid_507 {
+	font-family: 'DOTMATRI' !important;
+}
+
+
+
+</style>
+<table align="center" border="0" style="width: 40%" class="fontsforweb_fontid_507">
+    <tr>
+        <td colspan="6">
+            <strong>TOKO HAJI HASAN</strong><br>
+           Jalan Pasar Lama <br>
+            Tangerang-Banten
+        </td>
+        <td colspan="2" align="right"><img src="{% static "images/logo.png" %}" style="width: 50%;height: 40%"></td>
+    </tr>
+    <tr>
+        <td colspan="8">----------------------------------------------------------</td>
+    </tr>
+    <tr>
+        <td colspan="4" >{{ jual.tanggal }}  {{ jual.namaPembeli }}</td>
+        <td colspan="4" align="right">{{ jual.id }}/<strong>{{ user }}</strong></td>
+    </tr>
+     <tr>
+           <td colspan="8">----------------------------------------------------------</td>
+    </tr>
+
+    {% for data in bjual %}
+        <tr>
+              <td colspan="5">{{ data.barang.namaBarang }}</td>
+              <td align="right">{{ data.jumlahJual }}{{ data.satuan }}</td>
+              {% if data.pilihan == '1' %}
+                  <td align="right">bonus</td>
+                  <td align="right">----</td>
+              {% endif %}
+              {% if data.pilihan == '0' %}
+                  <td align="right">{{ data.hargaJual | intcomma }}</td>
+                  <td align="right">{{ data.subtotal | intcomma }}</td>
+              {% endif %}
+
+        </tr>
+    {% endfor %}
+
+    <tr>
+        <td colspan="6"></td>
+        <td colspan="2" align="right">----------------------------</td>
+    </tr>
+    <tr>
+        <td colspan="6" rowspan="3" align="center"> {% if sisa == 0 %}
+        <img src="{% static "images/lunas.jpeg" %}" style="width: 40%;height: 40%">
+        {% endif %}</td>
+        <td align="right">Total :</td>
+        <td align="right">{{ total | intcomma }}</td>
+    </tr>
+     <tr>
+
+        <td align="right">Diskon :</td>
+        <td align="right">{{ jual.potongan | intcomma }}</td>
+    </tr>
+        <tr>
+
+        <td colspan="2" align="right">----------------------------</td>
+    </tr>
+         <tr>
+        <td colspan="7" align="right">TOTAL BELANJA  :</td>
+        <td align="right"><strong>Rp. {{ totalBayar | intcomma }}</strong></td>
+
+    </tr>
+    <tr>
+        <td colspan="7" align="right">JUMLAH BAYAR :</td>
+        <td align="right"><strong>Rp. {{ jual.bayar | intcomma }}</strong></td>
+
+    </tr>
+ <tr>
+        <td colspan="7" align="right">UANG KEMBALI :</td>
+        <td align="right"><strong>Rp. {{ kembali | intcomma }}</strong></td>
+
+    </tr>
+ <tr>
+        <td colspan="7" align="right">SISA PEMBAYARAN :</td>
+        <td align="right"><strong>Rp. {{ sisa | intcomma }}</strong></td>
+
+    </tr>
+<tr>
+    <td colspan="8" align="center">
+&nbsp;
+    </td>
+</tr>
+ <tr>
+        <td colspan="7" align="right">&nbsp;</td>
+        <td align="right">&nbsp;</td>
+
+    </tr>
+ <tr>
+        <td colspan="8" align="center">Terima Kasih & Selamat Belanja Kembali</td>
+
+    </tr>
+
+         <tr>
+        <td colspan="8" align="center">NO HP : 09887654</td>
+
+    </tr>
+
+</table>

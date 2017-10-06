@@ -1,0 +1,59 @@
+{% extends 'layout.html' %}
+{% block title %} KATEGORI {% endblock %}
+{% load static %}
+{% load templatetags %}
+{% block content %}
+         <section class="content-header">
+    <h1>&nbsp;</h1>
+     <ol class="breadcrumb">
+      <li>Data Kategori</li>
+        <li><a >Kategori</a></li>
+
+       </ol>
+    </section>
+    <section class="content">
+      <div class="row">
+        <div class="col-xs-12">
+                    <!-- /.box -->
+
+          <div class="box">
+
+            <!-- /.box-header -->
+            <div class="box-body">
+{#            <h4>Data Kategori</h4>#}
+{#            <br>#}
+             <table class="table table-bordered table-hover" id="example">
+                 <thead>
+                 <tr>
+                     <th>No</th>
+                     <th>Nama Kategori</th>
+                     <th ><a href="{% url 'addKategori' %}" class="btn btn-flat btn-warning btn-sm "><i class="fa fa-plus"></i> &nbsp;Tambah Kategori</a></th>
+                 </tr>
+                 </thead>
+                 <tbody>
+                 {% for item in data%}
+                     <tr>
+                         <td style="width: 4%" align="center">{{ forloop.counter }}</td>
+                         <td>{{ item.namaKategori }}</td>
+                         <td style="width: 12%" align="center">
+
+                             <a href="{% url 'editKategori' item.id|encode_id %}"  class="btn btn-primary btn-sm fa fa-edit btn-flat"></a>
+
+                              <a href="{% url 'deleteKategori' item.id|encode_id %}" class="btn btn-danger btn-sm fa fa-remove btn-flat" onclick="return confirm('Are you sure you want to delete this?')"></a>
+
+                         </td>
+                    </tr>
+
+                 {% endfor %}
+                 </tbody>
+
+
+             </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+{% endblock content %}

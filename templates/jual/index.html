@@ -1,0 +1,71 @@
+{% extends 'layout.html' %}
+{% block title %} JUAL BARANG {% endblock %}
+{% load static %}
+{% load templatetags %}
+{% load humanize %}
+{% block content %}
+         <section class="content-header">
+    <h1>&nbsp;</h1>
+     <ol class="breadcrumb">
+        <li><i class="fa fa-floppy-o"></i> &nbsp;Data Penjualan Barang</li>
+        <li><a >Penjualan Barang</a></li>
+        <li class="active"><a href="{% url 'jual' %}"><button type="button" class="btn btn-danger btn-xs"><span class="fa fa-plus-circle"></span> Tambah Barang</button></a></li>
+      </ol>
+    </section>
+    <section class="content">
+      <div class="row">
+        <div class="col-xs-12">
+                    <!-- /.box -->
+
+          <div class="box">
+
+            <!-- /.box-header -->
+            <div class="box-body">
+{#            <h4>Data Kategori</h4>#}
+{#            <br>#}
+             <table class="table table-bordered table-hover" id="example">
+                 <thead>
+                 <tr>
+                     <th>No</th>
+                     <th>Tanggal</th>
+                     <th>Nama Pembeli</th>
+                     <th>Status Pembeli</th>
+                     <th>Pembayaran</th>
+                     <th>Total</th>
+                     <th>Potongan</th>
+                     <th>Keterangan</th>
+
+                     <th ></th>
+                 </tr>
+                 </thead>
+                 <tbody>
+                 {% for data in jual %}
+                     <tr>
+                         <td>{{ forloop.counter }}</td>
+                         <td>{{ data.tanggal }}</td>
+                         <td>{{ data.namaPembeli }}</td>
+                         <td>{{ data.get_statusPembeli_display }}</td>
+                         <td>{{ data.get_pembayaran_display }}</td>
+                         <td>{{ data.id | totalBelanja |intcomma }}</td>
+                         <td>{{ data.potongan | intcomma}}</td>
+                         <td>{{ data.keterangan }}</td>
+
+                         <td style="width: 18%" align="center">
+                             <a href="{% url 'editJual' data.id|encode_id %}"  class="btn btn-primary fa fa-edit btn-flat btn-sm"></a>
+                              {% if data.pembayaran == "0" %}<a class="btn btn-danger fa fa-street-view btn-flat btn-sm" href="{% url 'butang' data.id %}"> Masih Hutang</a>{% endif %}{% if data.pembayaran == "1" %}<a class="btn btn-success fa fa-street-view btn-flat btn-sm" href="{% url 'butang' data.id %}"> Sudah Lunas</a>{% endif %} </td>
+                         </td>
+                    </tr>
+
+                 {% endfor %}
+                 </tbody>
+
+
+             </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+{% endblock content %}

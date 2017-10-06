@@ -1,0 +1,104 @@
+{% extends 'layout.html' %}
+{% block title %} EDIT JUMLAH {% endblock %}
+{% load widget_tweaks %}
+{% load static %}
+{% block content %}
+    <script>
+        $(document).ready(function () {
+           $(".barang").select2()
+           $(".sbesar").select2()
+           $(".skecil").select2()
+           var form=$(".form");
+           form.submit(function (e) {
+                 var progress = $(".loading-progress").progressTimer({
+                        timeLimit: 0.5,
+                        onFinish: function () {
+                            $.ambiance({message: "Data updated",
+                            title: "Success !!",
+                            type: "success"});
+                        }
+                                 });
+                $.ajax({
+                    url:form.attr("action"),
+                    data:form.serialize(),
+                    type:form.attr("method"),
+                    success:function (data) {
+                                           }
+                }).error(function(){
+                   progress.progressTimer('error', {
+                   errorText:'Error',
+                   onFinish:function(){
+                   alert('There was an error processing your information!');
+            }
+        });
+    }).done(function(){
+        progress.progressTimer('complete');
+    });
+               e.preventDefault();
+           })
+        })
+    </script>
+         <section class="content-header">
+    <h1>&nbsp;</h1>
+     <ol class="breadcrumb">
+        <li> Edit Jumlah</li>
+        <li><a >Jumlah</a></li>
+      </ol>
+    </section>
+
+
+
+      <section class="content">
+      	<form class="form" role="form" action="/jumlah/update/{{id}}" method="post"> {% csrf_token %}
+<input type="hidden" name="posted_by" value="{{user.id}}">
+      <div class="row">
+        <!-- left column -->
+        <div class="col-md-12">
+          <!-- general form elements -->
+          <div class="box box-primary">
+
+ <div class="row">
+         <!-- left column -->
+        <div class="col-md-12">
+<div class="box-body">
+       <label for="first_name">Nama Barang</label>
+           {{ form.barang | add_class:'barang ' |attr:"style:width:100%" }}
+</div>
+<div class="box-body">
+       <label for="first_name">Satuan Besar</label>
+           {{ form.satuanBesar | add_class:'sbesar '  |attr:"style:width:100%" }}
+</div>
+
+<div class="box-body">
+       <label for="first_name">Satuan Kecil</label>
+           {{ form.satuanKecil | add_class:'skecil'  |attr:"style:width:100%" }}
+</div>
+<div class="box-body">
+       <label for="first_name">Jumlah</label>
+           {{ form.jumlah| add_class:'form-control jumlah ' }}
+</div>
+<div class="box-body sukses" >
+    <div class="loading-progress"></div>
+</div>
+<div class="box-footer ">
+        <button style="float: right;" class="btn btn-sm btn-primary  btn-flat" type="submit" name="action" id="save"><i class="fa fa-save" aria-hidden="true"></i>&nbsp;&nbsp;SIMPAN JUMLAH
+
+        </button>
+     <a style="float: right; margin-right: 5px" href="{% url 'jumlah' %}" class="btn btn-sm btn-warning  btn-flat" type="submit" name="action" id="save"><i class="fa fa-arrow-right" aria-hidden="true"></i>&nbsp;Kembali
+
+     </a>
+</div>
+</div>
+</div>
+
+                    </div>
+                </div>
+            </div>
+        </form>
+   </section>
+
+
+
+
+
+{% endblock content %}

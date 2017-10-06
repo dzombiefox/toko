@@ -1,0 +1,146 @@
+{% load static %}
+{% load humanize %}
+{% load widget_tweaks %}
+	<link type="text/css" rel="stylesheet" href="{% static 'css/bootstrap.css' %}" />
+    	<link type="text/css" rel="stylesheet" href="{% static 'css/select2.min.css' %}" />
+    	<link type="text/css" rel="stylesheet" href="{% static 'css/AdminLTE.min.css' %}" />
+    	<link type="text/css" rel="stylesheet" href="{% static 'css/_all-skins.min.css' %}" />
+    	<link type="text/css" rel="stylesheet" href="{% static 'css/dataTables.bootstrap.css' %}" />
+    	<link type="text/css" rel="stylesheet" href="{% static 'css/font-awesome.min.css' %}" />
+        <link type="text/css" rel="stylesheet" href="{% static 'css/jquery.ambiance.css' %}" />
+        <link type="text/css" rel="stylesheet" href="{% static 'css/datepicker3.css' %}" />
+        <script src="{% static 'js/jquery-2.2.3.min.js' %}"></script>
+        <script src="{% static 'js/bootstrap.min.js' %}"></script>
+        <script src="{% static 'js/jquery.slimscroll.min.js' %}"></script>
+        <script src="{% static 'js/fastclick.js' %}"></script>
+        <script src="{% static 'js/app.min.js' %}"></script>
+        <script src="{% static 'js/demo.js' %}"></script>
+        <script src="{% static 'js/jquery.dataTables.js' %}"></script>
+        <script src="{% static 'js/dataTables.bootstrap.min.js' %}"></script>
+        <script src="{% static 'js/select2.full.min.js' %}"></script>
+        <script src="{% static 'js/bootstrap-datepicker.js' %}"></script>
+
+<script>
+        function modalEkstrak(id,stok,satuan,jumlah) {
+          $(".stokId").val(id)
+          $('.jstok').val(stok)
+          var jumlah = jumlah+" " + satuan;
+          $(".jsatuan").html('<h4><span class="label label-success label-sm flat">'+jumlah+'</span></h4>')
+          $('#ModalEkstrak').modal('show');
+
+    }
+    $(document).ready(function () {
+{#        $("#tbl").dataTable();#}
+                $(".sat").select2()
+        var formekstrak =$(".formEkstrak")
+        formekstrak.submit(function (e) {
+            $.ajax({
+                data : formekstrak.serialize(),
+                url  : formekstrak.attr("action"),
+                type : formekstrak.attr("method"),
+                success : function (data) {
+                  if(data == "0"){
+                  alert("satuan jumlah belum ada")
+                  }
+                  else {
+                   $(".formEkstrak")[0].reset();
+                       alert("ok")
+                      $('#ModalEkstrak').modal('hide');
+                      $('#modalstok').modal('hide');
+                  }
+
+                }
+            })
+            e.preventDefault()
+        })
+    })
+</script>
+<br>
+<table class="table table-bordered table-hover" id="tbl"  align="center"style="width: 90%">
+                 <thead>
+                 <tr>
+                     <th>No</th>
+                     <th>Nama Barang</th>
+                     <th>Stok</th>
+
+                     <th align="right"># </th>
+                 </tr>
+                 </thead>
+                 <tbody>
+                 {% for item in data %}
+                     <tr>
+                         <td style="width: 4%" >{{ forloop.counter }}</td>
+                         <td>{{ item.barang }}</td>
+                         <td>
+                             {% if item.stok == 0 %}
+                                 KOSONG
+                             {% else %}
+                             {{ item.stok | intcomma  }}&nbsp;{{ item.satuan }}
+                             {% endif %}
+                         </td>
+
+                         <td style="width: 29%" align="right">
+                             {% if item.stok == 0 %}
+                               {% else %}
+                             <a class="btn btn-info btn-sm btn-flat fa fa-edit" onclick="modalEkstrak('{{ item.id }}','{{ item.stok }}','{{ item.satuan }}','{{ item.stok }}')">&nbsp;Ekstrak Stok</a>&nbsp;
+                             {% endif %}
+                             </td>
+                    </tr>
+                 {% empty %}
+                    <p align="center">Maaf Barang kosong</p>
+                 {% endfor %}
+                 </tbody>
+
+
+             </table>
+</br>
+</br>
+
+   <!-- Ekstrak Stok  begin -->
+<div class="modal fade " id="ModalEkstrak" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+{#        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>#}
+        <h4 class="modal-title" id="myModalLabel">FORM UBAH STOK</h4>
+      </div>
+      <div class="modal-body">
+      <form class="formEkstrak    form-horizontal" role="form" action="/ekstrakstok/save" method="post"> {% csrf_token %}
+           <input type="hidden" name="stok" class="stokId" >
+           <input type="hidden" name="posted_by" value="{{user.id}}">
+
+           <div class="form-group">
+           <label  class="col-sm-3 control-label ">Jumlah Stok</label>
+               <input type="hidden" name="jumlahawal" class="jstok">
+                    <div class="col-sm-9 jsatuan"  >
+                    </div>
+           </div>
+           <div class="form-group">
+           <label  class="col-sm-3 control-label">Jumlah Ubah</label>
+                    <div class="col-sm-9">
+                 {{ frm.jumlahekstrak | add_class:'form-control ' }}
+                    </div>
+           </div>
+          <div class="form-group">
+           <label  class="col-sm-3 control-label">Satuan</label>
+                    <div class="col-sm-9">
+                 {{ frm.satuan | add_class:'sat '|attr:"style:width:100%" }}
+                    </div>
+           </div>
+          <div class="form-group">
+           <label  class="col-sm-3 control-label">Keterangan</label>
+                    <div class="col-sm-9">
+                 {{ frm.keterangan | add_class:'form-control' |attr:"rows:2"}}
+                    </div>
+           </div>
+
+      <div class="modal-footer">
+{#        <button type="button" class="btn btn-default btn-flat" data-dismiss="modal">Close</button>#}
+          <input type="submit" value="SIMPAN" class="btn-flat btn btn-primary">
+
+      </div>
+  </form>
+    </div>
+  </div>
+</div> <!-- end modal extrak stok-->
+</div>
